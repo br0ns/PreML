@@ -1,6 +1,6 @@
 local
 $(SML_LIB)/basis/basis.mlb
-$(SML_LIB)/myoldlib/MyLib.mlb
+$(SML_LIB)/mylib/MyLib.mlb
 in
 Token.sig
 Token.sml
