@@ -1,0 +1,8 @@
+local
+$(SML_LIB)/basis/basis.mlb
+$(SML_LIB)/myoldlib/MyLib.mlb
+Base.mlb
+in
+PreML-main.sml
+end
+

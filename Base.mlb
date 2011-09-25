@@ -1,0 +1,22 @@
+local
+$(SML_LIB)/basis/basis.mlb
+$(SML_LIB)/myoldlib/MyLib.mlb
+in
+Token.sig
+Token.sml
+
+Source.sig
+Source.sml
+
+Rewrite.sig
+Rewrite.sml
+
+Rules.sig
+Rules.sml
+
+PreML.sig
+PreML.sml
+
+(* PreMLB.sig *)
+(* PreMLB.sml *)
+end
