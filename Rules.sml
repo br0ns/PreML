@@ -71,7 +71,7 @@ fun doBlock ? =
               else if e = ":=" then
                 one --> (fn (snd, _) =>
                 all --> (fn rest =>
-                return $ [ new "let" ]
+                return $ [ new "let val" ]
                          @ fst @
                          [ new "=" ]
                          @ snd @
