@@ -10,8 +10,6 @@ infix 2 >>> --> ??? produce
 
 structure TokMap = OrderedMapFn (type t = token
                                  val compare = compareTokens)
-fun preMLB ? = fail ?
-
 fun doBlock ? =
       let
         val dict = TokMap.fromList

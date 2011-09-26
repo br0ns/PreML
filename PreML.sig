@@ -1,4 +1,5 @@
 signature PreML =
 sig
-  val run : Path.t -> int * Path.t
+  (* {pathIn -> pahtOut -> ...} *)
+  val run : Path.t -> Path.t -> int
 end

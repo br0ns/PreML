@@ -17,6 +17,6 @@ Rules.sml
 PreML.sig
 PreML.sml
 
-(* PreMLB.sig *)
-(* PreMLB.sml *)
+PreMLB.sig
+PreMLB.sml
 end
