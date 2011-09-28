@@ -4,7 +4,7 @@ SML = mlton
 all: preml
 
 preml:
-	bash build.sh
+	@bash build.sh
 
 install : preml
 	install preml /usr/bin
