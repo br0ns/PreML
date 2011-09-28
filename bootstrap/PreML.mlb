@@ -1,7 +1,7 @@
 local
 $(SML_LIB)/basis/basis.mlb
 $(SML_LIB)/mylib/MyLib.mlb
-%pre Base.mlb
+ Base.mlb
 in
 PreML-main.sml
 end

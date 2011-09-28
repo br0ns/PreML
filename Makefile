@@ -1,11 +1,10 @@
 SML = mlton
-
 # .PHONY: all
 
 all: preml
 
 preml:
-	$(SML) -output preml PreML.mlb
+	bash build.sh
 
 install : preml
 	install preml /usr/bin

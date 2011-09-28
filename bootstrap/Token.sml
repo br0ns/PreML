@@ -52,13 +52,13 @@ fun sml ? =
                 void $ Text.oneOf "abfnrtv\\\"" |||
                 void $ count 3 Text.digit |||
                 Text.whitespace --| Symb.backslash
-            fun loop ? =
-                do c <- any
-                 ; case c of
+            fun loop ? = ( ( 
+                        any ) >>= (fn  c => 
+                   case c of
                      #"\"" => return ()
                    | #"\\" => escape |-- loop
-                   | _     => loop
-                end ?
+                   | _     => loop ) ) 
+                    ?
           in
             Symb.quote |-- loop
           end

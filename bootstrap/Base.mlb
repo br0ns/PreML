@@ -3,7 +3,7 @@ $(SML_LIB)/basis/basis.mlb
 $(SML_LIB)/mylib/MyLib.mlb
 in
 Token.sig
-%pre Token.sml
+ Token.sml
 
 Source.sig
 Source.sml
@@ -12,10 +12,10 @@ Rewrite.sig
 Rewrite.sml
 
 Parsers.sig
-%pre Parsers.sml
+ Parsers.sml
 
 Rules.sig
-%pre Rules.sml
+ Rules.sml
 
 PreML.sig
 PreML.sml
