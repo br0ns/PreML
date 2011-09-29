@@ -56,22 +56,19 @@ fun doBlock ? =
           end ?
     in
       do token "do"
-       ; do token "with"
-          ; monad <- any
-          ; token ";"
-          ; block <- all
-          ; return $ [ new "let open"
-                     , monad
-                     , new "infix >>="
-                     , new "in" ]
-                     @ block @
-                     [ new "end" ]
-         end |||
-         do block <- all
-          ; return $ [ new "(" ]
-                     @ block @
-                     [ new ")" ]
-         end
+       ; maybeWith <- do token "with"
+                       ; monad <- any
+                       ; token ";"
+                       ; return [new $ "val op>>= = " ^
+                                 tokenToString monad ^
+                                 ".>>="]
+                      end ||| return nil
+       ; block <- all
+       ; return $ [ new "let infix 0 >>=" ]
+                  @ maybeWith @
+                  , new "in" ]
+                  @ block @
+                  [ new "end" ]
       end
     end ?
 
