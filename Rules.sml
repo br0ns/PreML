@@ -57,11 +57,15 @@ fun doBlock ? =
     in
       do token "do"
        ; maybeWith <- do token "with"
-                       ; monad <- any
+                       ; tmonad <- any
+                       ; monad := tokenToString tmonad
                        ; token ";"
-                       ; return [new $ "val op>>= = " ^
-                                 tokenToString monad ^
-                                 ".>>="]
+                       ; return [ new $ "val op>>= = " ^
+                                  monad ^
+                                  ".>>="
+                                , new $ "val return = " ^
+                                  monad ^
+                                  ".return" ]
                       end ||| return nil
        ; block <- all
        ; return $ [ new "let infix 0 >>=" ]
