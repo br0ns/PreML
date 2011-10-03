@@ -7,8 +7,8 @@ preml:
 	@bash build.sh
 
 install : preml
-	install preml /usr/bin
-	install premlton /usr/bin
+	install preml /usr/local/bin
+	install premlton /usr/local/bin
 
 .PHONY: clean
 clean :
