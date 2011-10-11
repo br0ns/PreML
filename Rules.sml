@@ -70,7 +70,7 @@ fun doBlock ? =
        ; block <- all
        ; return $ [ new "let infix 0 >>=" ]
                   @ maybeWith @
-                  , new "in" ]
+                  [ new "in" ]
                   @ block @
                   [ new "end" ]
       end
