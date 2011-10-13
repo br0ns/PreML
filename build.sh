@@ -2,7 +2,7 @@
 
 SML=mlton
 
-if [ -f /usr/bin/preml ] && [ -f /usr/bin/premlton ]; then
+if [ -f /usr/local/bin/preml ] && [ -f /usr/local/bin/premlton ]; then
     premlton PreML.mlb
 else
     echo "PreML is not installed.  Bootstrapping..."
