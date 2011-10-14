@@ -2,5 +2,15 @@
 
 Supports =do=-syntax, and more.
 
-*Important:* PreML requires MyLib and MLTon. Get MyLib from
-http://github.com/mortenbp/mylib, and "install" with =make mlton-create-link=.
+Put this in your =.emacs=:
+#+begin_src lisp
+(setq sml-use-command
+      (concat
+       "local "
+       "val filei = \"%s\" "
+       "val fileo = filei ^ \".preml\" "
+       "val _ = OS.Process.system (\"preml \\\"\" ^ filei ^ \"\\\"\") "
+       "val _ = use fileo "
+       "in end ")
+      )
+#+end_src
