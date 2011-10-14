@@ -2,15 +2,16 @@
 hash preml 2>&- || { echo >&2 "PreML is not installed.  Aborting."; exit 1; }
 hash mlton 2>&- || { echo >&2 "MLTon is not installed.  Aborting."; exit 1; }
 
-OUTPUT=.preml-output
+OUTPUT=/tmp/preml-output
 
 if [ $1 ]; then
    preml "$1" | tee $OUTPUT
+   cd "`dirname $1`"
    FILES=`cat $OUTPUT | sed "s/.*-> //"`
    TARGET=`echo $FILES | xargs -n 1 | tail -n 1`
    echo ""
    echo "Preprocessing done.  Running mlton."
-   mlton -output "`dirname $1`/`basename "$1" .mlb`" "$TARGET"
+   mlton -output "`basename "$1" .mlb`" "$TARGET"
    rm $FILES
    rm $OUTPUT
 else

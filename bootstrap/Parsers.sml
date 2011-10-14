@@ -40,15 +40,15 @@ fun until e =
                 case TokMap.lookup nesting t of
                   SOME e => loop $ e :: st
                 | NONE   => f
-            val next = ( ( 
+            val next = let infix 0 >>= in ( 
                         any ) >>= (fn  t => ( 
                               endOr t $ beginOr t $ loop st ) >>= (fn  (ts, e) => 
-                   return (t :: ts, e) ) ) ) 
+                   return (t :: ts, e) ) ) end 
 
           in
-            if null st then ( ( 
+            if null st then let infix 0 >>= in ( 
                       e ) >>= (fn  t => 
-                 return ([], t) ) ) 
+                 return ([], t) ) end 
 
                 ||| next
             else

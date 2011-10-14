@@ -1,16 +1,13 @@
 #!/bin/bash
 
-if [ -f /usr/bin/preml ] && [ -f /usr/bin/premlton ]; then
+if [ -f /usr/local/bin/preml ] && [ -f /usr/local/bin/premlton ]; then
     OUTPUT=/tmp/preml-output
 
     rm -rf bootstrap/*
-    cp *.sml bootstrap 2> /dev/null
-    cp *.sig bootstrap 2> /dev/null
-    cp *.fun bootstrap 2> /dev/null
-    cp *.mlb bootstrap 2> /dev/null
+    cp src/*.sml src/*.sig src/*.fun src/*.mlb bootstrap 2> /dev/null
 
     echo "Running PreML"
-    preml PreML.mlb | tee $OUTPUT
+    preml src/PreML.mlb | tee $OUTPUT
 
     echo ""
     echo "(re)Moving processed files"
@@ -19,11 +16,11 @@ if [ -f /usr/bin/preml ] && [ -f /usr/bin/premlton ]; then
         SRC=`echo $LINE | sed "s/.*-> //"` ;
         EXT="${DST##*.}"
         if [[ "$EXT" != "mlb" ]]; then
-            mv $SRC bootstrap/$DST
-            echo mv $SRC bootstrap/$DST
+            mv src/$SRC bootstrap/$DST
+            echo mv src/$SRC bootstrap/$DST
         else
-            rm $SRC
-            echo rm $SRC
+            rm src/$SRC
+            echo rm src/$SRC
         fi
     done < $OUTPUT
 

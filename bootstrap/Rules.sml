@@ -17,11 +17,11 @@ fun newName () = new $ "PreML__TMP__" ^ UniqId.next ()
 fun doBlock ? =
     let
       val one = until $ choice $ map token ["<-", ":=", "end", ";"]
-      fun all ? = ( ( 
+      fun all ? = let infix 0 >>= in ( 
                           one ) >>= (fn  (fst, et) => let val 
              e =  tokenToString et in 
              case e of
-               "<-" => ( ( 
+               "<-" => let infix 0 >>= in ( 
                               one ) >>= (fn  (snd, _) => ( 
                           all ) >>= (fn  rest => 
                   return $ [ new "(" ]
@@ -30,9 +30,9 @@ fun doBlock ? =
                   @ fst @
                   [ new "=>" ]
                   @ rest @
-                  [ new ")" ] ) ) ) 
+                  [ new ")" ] ) ) end 
 
-             | ":=" => ( ( 
+             | ":=" => let infix 0 >>= in ( 
                               one ) >>= (fn  (snd, _) => ( 
                           all ) >>= (fn  rest => 
                   return $ [ new "let val" ]
@@ -41,41 +41,42 @@ fun doBlock ? =
                   @ snd @
                   [ new "in" ]
                   @ rest @
-                  [ new "end" ] ) ) ) 
+                  [ new "end" ] ) ) end 
 
-             | ";" => ( ( 
+             | ";" => let infix 0 >>= in ( 
                           all ) >>= (fn  rest => 
                   return $ [ new "(" ]
                   @ fst @
                   [ new ") >>= (fn _ =>" ]
                   @ rest @
-                  [ new ")" ] ) ) 
+                  [ new ")" ] ) end 
 
              | _ =>
-               return fst end ) ) 
+               return fst end ) end 
               ?
-    in ( ( 
-         token "do" ) >>= (fn _ => ( ( 
-            token "with" ) >>= (fn _ => ( 
-                     any ) >>= (fn  monad => ( 
-            token ";" ) >>= (fn _ => ( 
-                     all ) >>= (fn  block => 
-            return $ [ new "let open"
-                     , monad
-                     , new "infix >>="
-                     , new "in" ]
-                     @ block @
-                     [ new "end" ] ) ) ) ) ) 
-             ||| ( ( 
-                     all ) >>= (fn  block => 
-            return $ [ new "(" ]
-                     @ block @
-                     [ new ")" ] ) ) ) ) 
-
+    in let infix 0 >>= in ( 
+         token "do" ) >>= (fn _ => ( let infix 0 >>= in ( 
+                         token "with" ) >>= (fn _ => ( 
+                                   any ) >>= (fn  tmonad => let val 
+                         monad =  tokenToString tmonad in ( 
+                         token ";" ) >>= (fn _ => 
+                         return [ new $ "val op>>= = " ^
+                                  monad ^
+                                  ".>>="
+                                , new $ "val return = " ^
+                                  monad ^
+                                  ".return" ] ) end ) ) end 
+                          ||| return nil ) >>= (fn  maybeWith => ( 
+                  all ) >>= (fn  block => 
+         return $ [ new "let infix 0 >>=" ]
+                  @ maybeWith @
+                  [ new "in" ]
+                  @ block @
+                  [ new "end" ] ) ) ) end 
 
     end ?
 
-fun openFunctor ? = ( ( 
+fun openFunctor ? = let infix 0 >>= in ( 
        token "open" ) >>= (fn _ => ( 
                any ) >>= (fn  func => ( 
              token "(" ) >>= (fn  tb => ( 
@@ -83,17 +84,17 @@ fun openFunctor ? = ( (
        tmpName =  newName () in 
        return $ [ new "local structure", tmpName, new "=" ]
                 @ func :: tb :: ts @ te ::
-                [ new "in open", tmpName, new "end" ] end ) ) ) ) ) 
+                [ new "in open", tmpName, new "end" ] end ) ) ) ) end 
         ?
 
-fun classes ? = ( ( 
+fun classes ? = let infix 0 >>= in ( 
        token "(" ) >>= (fn _ => ( 
               any ) >>= (fn  fst => ( 
-               many ( ( token "," ) >>= (fn _ => 
-                       any ) ) ) >>= (fn  rest => ( 
+               many let infix 0 >>= in ( token "," ) >>= (fn _ => 
+                       any ) end ) >>= (fn  rest => ( 
 
        token ")" ) >>= (fn _ => 
-       return $ fst :: rest ) ) ) ) ) 
+       return $ fst :: rest ) ) ) ) end 
         ?
 
 fun unClasses cls =
@@ -104,7 +105,7 @@ fun unClasses cls =
       new "(" :: loop cls
     end
 
-fun extendExisting ? = ( ( 
+fun extendExisting ? = let infix 0 >>= in ( 
        token "extend" ) >>= (fn _ => ( 
               any ) >>= (fn  str => ( 
        token "as" ) >>= (fn _ => ( 
@@ -143,10 +144,10 @@ fun extendExisting ? = ( (
                 @ rev tmps @
                 [ str
                 , new "end"
-                , new "end" ] end ) ) ) ) ) 
+                , new "end" ] end ) ) ) ) end 
         ?
 
-fun extendNew ? = ( ( 
+fun extendNew ? = let infix 0 >>= in ( 
        token "struct" ) >>= (fn _ => ( 
               classes ) >>= (fn  cls => ( 
                    until $ token "end" ) >>= (fn  (str, _) => let val 
@@ -167,7 +168,7 @@ fun extendNew ? = ( (
                 , new "open"
                 , tmp
                 , new "end"
-                , new "end" ] end ) ) ) ) 
+                , new "end" ] end ) ) ) end 
         ?
 
 
