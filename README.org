@@ -3,7 +3,7 @@
 Supports =do=-syntax, and more.
 
 Put this in your =.emacs=:
-#+begin_src lisp
+#+BEGIN_SRC: lisp
 (setq sml-use-command
       (concat
        "local "
@@ -13,4 +13,4 @@ Put this in your =.emacs=:
        "val _ = use fileo "
        "in end ")
       )
-#+end_src
+#+END_SRC
