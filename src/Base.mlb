@@ -6,10 +6,10 @@ Token.sig
 %pre Token.sml
 
 Source.sig
-Source.sml
+%pre Source.sml
 
 Rewrite.sig
-Rewrite.sml
+%pre Rewrite.sml
 
 Parsers.sig
 %pre Parsers.sml

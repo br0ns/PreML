@@ -12,4 +12,5 @@ sig
   val compareTokens : token -> token -> order
   val sameToken : token -> token -> bool
   val tokenToString : token -> string
+  val tokenSpan : token -> Source.span
 end

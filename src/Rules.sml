@@ -82,9 +82,9 @@ fun openFunctor ? =
      ; tb <- token "("
      ; (ts, te) <- until $ token ")"
      ; tmpName := newName ()
-     ; return $ [ new "local structure", tmpName, new "=" ]
+     ; return $ [ new "structure", tmpName, new "=" ]
                 @ func :: tb :: ts @ te ::
-                [ new "in open", tmpName, new "end" ]
+                [ new "open", tmpName ]
     end ?
 
 fun classes ? =
@@ -171,5 +171,14 @@ fun extendNew ? =
                 , new "end" ]
     end ?
 
-
+fun failWithPosition file source =
+    do token "FailWithPosition"
+     ; s <- any
+     ; (p, _) := tokenSpan s
+     ; {row = r, column = c} := Source.position source p
+     ; s' := Path.toString file ^ "(" ^ Int.toString r ^ ":" ^ Int.toString c ^
+             "): " ^ stripQuotes (tokenToString s)
+     ; return [ new ("Fail \"" ^ s' ^ "\"") ]
+    end
+and stripQuotes s = String.substring (s, 1, size s - 2);
 end

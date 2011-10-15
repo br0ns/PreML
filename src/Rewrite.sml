@@ -23,6 +23,11 @@ fun tokenToString t =
       Old (n, s) => Source.span s
     | New s => s
 
+fun tokenSpan t =
+    case t of
+      Old (_, (_, s)) => s
+    | New _ => raise FailWithPosition "`New` token has no span"
+
 fun compareTokens a b = String.compare (tokenToString a, tokenToString b)
 fun sameToken a b = compareTokens a b = EQUAL
 
