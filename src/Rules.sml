@@ -82,9 +82,9 @@ fun openFunctor ? =
      ; tb <- token "("
      ; (ts, te) <- until $ token ")"
      ; tmpName := newName ()
-     ; return $ [ new "structure", tmpName, new "=" ]
+     ; return $ [ new "local structure", tmpName, new "=" ]
                 @ func :: tb :: ts @ te ::
-                [ new "open", tmpName ]
+                [ new "in open", tmpName, new "end" ]
     end ?
 
 fun classes ? =
