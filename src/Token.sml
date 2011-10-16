@@ -9,8 +9,10 @@ infix 0 ||| infix 1 --- |-- --| ^^^ ::: infix 2 >>> --> ??? produce
 infix >>=
 val op>>= = op-->
 
-fun mlb ? =
-    (many1' $ predicate Char.isGraph) ?
+fun project ? =
+    (void $ Text.oneOf "()" |||
+     many1' $ predicate (fn c => c <> #"(" andalso c <> #")" andalso
+                                 Char.isGraph c)) ?
 
 fun sml ? =
     let
