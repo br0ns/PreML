@@ -7,4 +7,5 @@ sig
   val extendExisting : 'x t
   val openFunctor : 'x t
   val failWithPosition : Path.t -> Source.t -> 'x t
+  val includeFile : Path.t -> 'x t
 end

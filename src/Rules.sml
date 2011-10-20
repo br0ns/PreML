@@ -171,6 +171,9 @@ fun extendNew ? =
                 , new "end" ]
     end ?
 
+fun stripQuotes s = String.substring (s, 1, size s - 2);
+fun isString s = size s > 0 andalso String.sub(s, 0) = #"\""
+
 fun failWithPosition file source =
     do token "FailWithPosition"
      ; s <- any
@@ -180,5 +183,25 @@ fun failWithPosition file source =
              "): " ^ stripQuotes (tokenToString s)
      ; return [ new ("Fail \"" ^ s' ^ "\"") ]
     end
-and stripQuotes s = String.substring (s, 1, size s - 2);
+
+fun includeFile path =
+    let
+      fun readFile s =
+          TextIO.readFile $ Path.toString $ Path.new' path $ stripQuotes s
+    in
+      do token "include"
+       ; t <- any
+       ; s := tokenToString t
+       ; if isString s then
+           return [ new $ readFile s ]
+         else if s = "singleline" then
+           do t <- any
+            ; s := tokenToString t
+            ; return
+                [ new $ String.map (fn #"\n" => #" " | c => c) $ readFile s ]
+           end
+         else
+           fail
+      end
+    end
 end
