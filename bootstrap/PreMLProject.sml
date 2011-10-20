@@ -1,4 +1,4 @@
-structure PreMLB :> PreMLB =
+structure PreMLProject :> PreMLProject =
 struct
 
 fun run loop pathI pathO =
@@ -17,7 +17,7 @@ fun run loop pathI pathO =
           ) ?
 
       val src = Source.fromString $ TextIO.readFile $ toString pathI
-      val (n, src') = Rewrite.run Token.mlb src rule
+      val (n, src') = Rewrite.run Token.project src rule
     in
       TextIO.writeFile (toString pathO) $ Source.toString src'
     ; (n, !paths)

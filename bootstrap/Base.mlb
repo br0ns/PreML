@@ -6,10 +6,10 @@ Token.sig
  Token.sml
 
 Source.sig
-Source.sml
+ Source.sml
 
 Rewrite.sig
-Rewrite.sml
+ Rewrite.sml
 
 Parsers.sig
  Parsers.sml
@@ -20,6 +20,6 @@ Rules.sig
 PreML.sig
 PreML.sml
 
-PreMLB.sig
-PreMLB.sml
+PreMLProject.sig
+PreMLProject.sml
 end

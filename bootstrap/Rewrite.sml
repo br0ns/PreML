@@ -5,6 +5,10 @@ infix 0 |||
 infix 1 --- |-- --| ^^^ ::: @@@
 infix 2 >>> --> ??? produce underlies
 
+(* TODO: Remove this when Parser moves from --> to >>= *)
+infix >>=
+val op>>= = op-->
+
 (* a chunk of source code is either unchanged (Old) in which case it has a
  * start and an ending position (pos * pos) in the source code, or it is
  * changed to something else (New) in which case it is just a string
@@ -23,21 +27,45 @@ fun tokenToString t =
       Old (n, s) => Source.span s
     | New s => s
 
+fun tokenSpan t =
+    case t of
+      Old (_, (_, s)) => s
+    | New _ => raise Fail "/home/mortenbp/code/sml/preml/src/Rewrite.sml(33:38): `New` token has no span" 
+
 fun compareTokens a b = String.compare (tokenToString a, tokenToString b)
 fun sameToken a b = compareTokens a b = EQUAL
 
 fun run tok src rule =
     let
       val num = ref 0
-      val tok = Lex.lexeme (
-                getPosition -->        (fn l =>
-                tok -->                (fn _ =>
-                getPosition -->        (fn r =>
-                return $ Old (inc num, (src, (l, r)))
-                                       )))
-                )
+      val token =
+          Lex.lexeme (
+          getPosition -->        (fn l =>
+          tok -->                (fn _ =>
+          getPosition -->        (fn r =>
+          return $ Old (inc num, (src, (l, r)))
+                                 )))
+          )
 
       val num = ref 0
+      val unfold =
+          List.concat
+          o map (fn New s =>
+                    Parser.test
+                      Char.toString
+                      (many $ Lex.lexeme let infix 0 >>= in ( 
+                               getPosition ) >>= (fn  l => ( 
+                          tok ) >>= (fn _ => ( 
+                               getPosition ) >>= (fn  r => let val 
+                          t =  String.substring (s, l, r - l) in let val 
+                          _ =  print t in let val 
+                          _ =  print "\n\n" in 
+                          return $ New t end end end ) ) ) end 
+                          )
+                      Source.read
+                      (Source.fromString s)
+                  | t => [t]
+                )
       fun loop ? =
           (rule                           --> (fn ts =>
            loop                           --> (fn (rest, _) =>
@@ -108,7 +136,7 @@ fun run tok src rule =
       val toks =
           Parser.test
             Char.toString
-            (Text.whitespace |-- many tok)
+            (Text.whitespace |-- many token)
             Source.read
             src
       val src' = Source.fromString $ Layout.pretty NONE $ render $ fix toks

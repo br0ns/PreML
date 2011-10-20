@@ -38,14 +38,19 @@ fun new path =
       NONE   => Path.new (Path.toString path ^ ".preml")
     | SOME e => Path.new (Path.base path ^ ".preml." ^ e)
 
+fun extOneOf p es =
+    case Path.extension p of
+      SOME e => List.exists (e \< op=) es
+    | NONE   => false
+
 fun run path =
     case check path of
       SOME path' => path'
     | NONE =>
-      if Path.extension path = SOME "mlb" then
+      if extOneOf path ["mlb", "cm"] then
         let
           val path' = new path
-          val (n, paths) = PreMLB.run run path path'
+          val (n, paths) = PreMLProject.run run path path'
         in
           record path path'
         ; printChanged (n, path, path')

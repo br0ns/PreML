@@ -171,5 +171,37 @@ fun extendNew ? = let infix 0 >>= in (
                 , new "end" ] end ) ) ) end 
         ?
 
+fun stripQuotes s = String.substring (s, 1, size s - 2);
+fun isString s = size s > 0 andalso String.sub(s, 0) = #"\""
 
+fun failWithPosition file source = let infix 0 >>= in ( 
+       token "FailWithPosition" ) >>= (fn _ => ( 
+            any ) >>= (fn  s => let val 
+       (p, _) =  tokenSpan s in let val 
+       {row = r, column = c} =  Source.position source p in let val 
+       s' =  Path.toString file ^ "(" ^ Int.toString r ^ ":" ^ Int.toString c ^
+             "): " ^ stripQuotes (tokenToString s) in 
+       return [ new ("Fail \"" ^ s' ^ "\"") ] end end end ) ) end 
+
+
+fun includeFile path =
+    let
+      fun readFile s =
+          TextIO.readFile $ Path.toString $ Path.new' path $ stripQuotes s
+    in let infix 0 >>= in ( 
+         token "include" ) >>= (fn _ => ( 
+              any ) >>= (fn  t => let val 
+         s =  tokenToString t in 
+         if isString s then
+           return [ new $ readFile s ]
+         else if s = "singleline" then let infix 0 >>= in ( 
+                   any ) >>= (fn  t => let val 
+              s =  tokenToString t in 
+              return
+                [ new $ String.map (fn #"\n" => #" " | c => c) $ readFile s ] end ) end 
+
+         else
+           fail end ) ) end 
+
+    end
 end

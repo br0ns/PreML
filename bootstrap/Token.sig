@@ -2,6 +2,6 @@
 signature Token =
 sig
   type 'a t = (char, unit, 'a) Parser.parser
-  val mlb : 'a t
+  val project : 'a t
   val sml : 'a t
 end
