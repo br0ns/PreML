@@ -11,6 +11,7 @@ Put this in your =.emacs=:
        "val fileo = filei ^ \".preml\" "
        "val _ = OS.Process.system (\"preml \\\"\" ^ filei ^ \"\\\"\") "
        "val _ = use fileo "
-       "in end ")
+       "val _ = OS.FileSys.remove fileo "
+       "in end")
       )
 #+END_SRC
