@@ -227,4 +227,46 @@ fun openFiltered ? =
      ; str <- any
      ; return $ importVals str vs
     end ?
+
+fun listComp ? =
+    let
+      fun bind pat list body =
+          [ new "(List.concat (List.map (fn" ]
+          @ pat @
+          [ new "=>" ]
+          @ body @
+          [ new ")(" ]
+          @ list @
+          [ new ")))" ]
+      fun filt con body =
+          [ new "if" ]
+          @ con @
+          [ new "then" ]
+          @ body @
+          [ new "else List.nil" ]
+      val one = until $ choice $ map token ["<-", ",", "]"]
+      fun all (body, et) =
+          if tokenToString et = "]" then
+            return body
+          else
+            do (fst, et) <- one
+             ; if tokenToString et = "<-" then
+                 do (list, et) <- one
+                  ; body' <- all (body, et)
+                  ; return $ bind fst list body'
+                 end
+               else
+                 do body' <- all (body, et)
+                  ; return $ filt fst body'
+                 end
+            end
+    in
+      do token "["
+       ; (exp, pipe) <- until $ choice $ map token ["|", "]"]
+       ; if tokenToString pipe <> "|"
+         then fail
+         else all (new "[" :: exp @ [new "]"], pipe)
+      end
+    end ?
+
 end

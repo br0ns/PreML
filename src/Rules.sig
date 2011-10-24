@@ -9,4 +9,5 @@ sig
   val failWithPosition : Path.t -> Source.t -> 'x t
   val includeFile : Path.t -> 'x t
   val openFiltered : 'x t
+  val listComp : 'x t
 end
