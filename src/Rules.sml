@@ -204,4 +204,27 @@ fun includeFile path =
            fail
       end
     end
+
+val vals = classes
+fun importVals str =
+    List.concat
+    o map (fn v =>
+              let
+                val lhs = tokenToString v
+                val rhs = tokenToString str ^ "." ^ lhs
+              in
+                [ new "val"
+                , new lhs
+                , new "="
+                , new rhs
+                ]
+              end
+          )
+
+fun openFiltered ? =
+    do token "open"
+     ; vs <- vals
+     ; str <- any
+     ; return $ importVals str vs
+    end ?
 end

@@ -12,6 +12,7 @@ fun run pathI pathO =
                    , extendNew
                    , failWithPosition pathI src
                    , includeFile $ Path.dir pathI
+                   , openFiltered
                    ]
           end
       val (n, src') = Rewrite.run Token.sml src rules
