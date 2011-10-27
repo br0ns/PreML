@@ -269,4 +269,27 @@ fun listComp ? =
       end
     end ?
 
+
+fun partTuples ? =
+    do lp <- token "("
+     ; rps := [new ")", new ")"]
+     ; v := newName ()
+     ; fnhead := [new "(fn", v, new "=>", lp]
+     ; untilNext := until $ (try (token "," |-- (token "," ||| token ")"))
+                             ||| (token ")" |-- fail))
+     ; (do c <- token ","
+         ; (rest, _) <- until $ token ")"
+         ; return $ fnhead @ [v, new ","] @ rest @ rps
+        end |||
+        do (l, et) <- untilNext
+         ; if tokenToString et = ")"
+           then return $ fnhead @ l @ [new ",", v] @ rps
+           else
+             do (r, _) <- until $ token ")"
+              ; return $ fnhead @ l @ [new ",", v, new ","] @ r @ rps
+             end
+        end
+       )
+    end ?
+
 end

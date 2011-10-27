@@ -14,6 +14,7 @@ fun run pathI pathO =
                    , includeFile $ Path.dir pathI
                    , openFiltered
                    , listComp
+                   , partTuples
                    ]
           end
       val (n, src') = Rewrite.run Token.sml src rules
