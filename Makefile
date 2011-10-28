@@ -1,15 +1,15 @@
 SML = mlton
 # .PHONY: all
 
-all: preml
+all: bin/preml
 
-preml: src/*
+bin/preml: src/*
 	@bash build.sh
 
-install : preml
+install : bin/preml
 	install preml /usr/local/bin
 	install premlton /usr/local/bin
 
 .PHONY: clean
 clean :
-	-rm preml
+	-rm bin/preml
