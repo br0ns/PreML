@@ -12,4 +12,4 @@ else
     echo ""
     echo "You are now ready for 'sudo make install'."
 fi
-mv src/PreML preml
+mv src/PreML bin/preml
