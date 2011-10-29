@@ -205,20 +205,24 @@ fun includeFile path =
     let
       fun readFile s =
           TextIO.readFile $ Path.toString $ Path.new' path $ stripQuotes s
+      fun strings ? =
+          (try do t <- any
+                ; s := tokenToString t
+                ; if isString s
+                  then strings >>> (fn ss => s :: ss)
+                  else fail
+               end |||
+           return nil
+          ) ?
     in
       do token "include"
-       ; t <- any
-       ; s := tokenToString t
-       ; if isString s then
-           return [ new $ readFile s ]
-         else if s = "singleline" then
-           do t <- any
-            ; s := tokenToString t
-            ; return
-                [ new $ String.map (fn #"\n" => #" " | c => c) $ readFile s ]
-           end
-         else
-           fail
+       ; singleline <- (token "singleline" produce true ||| return false)
+       ; ss <- strings
+       ; ss := map readFile ss
+       ; ss := if singleline
+               then map (String.map (fn #"\n" => #" " | c => c)) ss
+               else ss
+       ; return $ map new ss
       end
     end
 
