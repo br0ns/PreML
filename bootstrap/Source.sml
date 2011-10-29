@@ -23,6 +23,7 @@ fun lift m s = let infix 0 >>= val op>>= = M.>>= val return = M.return in (
 fun return a s = M.return (a, s)
 fun get s = M.return (s, s)
 fun put s _ = M.return ((), s)
+fun modify f s = M.return ((), f s)
 fun evalStateT m s = let infix 0 >>= val op>>= = M.>>= val return = M.return in ( 
 
                  m s ) >>= (fn  (a, _) => 
@@ -43,6 +44,8 @@ fun >>= (SOME x, k) = k x
 val return = SOME
 end
 
+structure Reader = StateT (Option)
+
 structure Source :> Source =
 struct
 
@@ -60,7 +63,6 @@ fun span (s, (l, r)) = string $ slice (s, l, SOME (r - l))
 
 val read = getc
 
-structure Reader = StateT (Option)
 fun position s p =
     let open Reader
       fun loop 0 r c = return {row = r, column = c}
@@ -74,7 +76,7 @@ fun position s p =
     in
       case evalStateT (loop p 1 0) s of
         SOME r => r
-      | NONE   => raise Fail "/home/mortenbp/code/sml/preml/src/Source.sml(78:26): PreML.Source.position: Reached end of file." 
+      | NONE   => raise Fail "/home/mortenbp/code/sml/preml/bootstrap/Source.sml(80:26): PreML.Source.position: Reached end of file." 
 
     end
 end

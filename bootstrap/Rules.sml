@@ -13,6 +13,23 @@ infix >>=
 val op>>= = op-->
 
 fun newName () = new $ "PreML__TMP__" ^ UniqId.next ()
+fun newNameInScope toks =
+    let
+      val cs = "xyzabcdefghijklmpqrstuvw"
+      val n = size cs
+      val first = [0]
+      val toString = implode o List.map (curry String.sub cs)
+      val rec next = fn nil => [0]
+                      | c :: cs => if c = n
+                                   then 0 :: next cs
+                                   else (c + 1) :: cs
+      fun loop v =
+          if List.exists (fn t => tokenToString t = toString v) toks
+          then loop $ next v
+          else new $ toString v
+    in
+      loop first
+    end
 
 fun doBlock ? =
     let
@@ -188,20 +205,116 @@ fun includeFile path =
     let
       fun readFile s =
           TextIO.readFile $ Path.toString $ Path.new' path $ stripQuotes s
+      fun strings ? =
+          (try let infix 0 >>= in ( any ) >>= (fn  t => let val 
+                  s =  tokenToString t in 
+                  if isString s
+                  then strings >>> (fn ss => s :: ss)
+                  else fail end ) end 
+                   |||
+           return nil
+          ) ?
     in let infix 0 >>= in ( 
          token "include" ) >>= (fn _ => ( 
-              any ) >>= (fn  t => let val 
-         s =  tokenToString t in 
-         if isString s then
-           return [ new $ readFile s ]
-         else if s = "singleline" then let infix 0 >>= in ( 
-                   any ) >>= (fn  t => let val 
-              s =  tokenToString t in 
-              return
-                [ new $ String.map (fn #"\n" => #" " | c => c) $ readFile s ] end ) end 
-
-         else
-           fail end ) ) end 
+                       (token "singleline" produce true ||| return false) ) >>= (fn  singleline => ( 
+               strings ) >>= (fn  ss => let val 
+         ss =  map readFile ss in let val 
+         ss =  if singleline
+               then map (String.map (fn #"\n" => #" " | c => c)) ss
+               else ss in 
+         return $ map new ss end end ) ) ) end 
 
     end
+
+val vals = classes
+fun importVals str =
+    List.concat
+    o map (fn v =>
+              let
+                val lhs = tokenToString v
+                val rhs = tokenToString str ^ "." ^ lhs
+              in
+                [ new "val"
+                , new lhs
+                , new "="
+                , new rhs
+                ]
+              end
+          )
+
+fun openFiltered ? = let infix 0 >>= in ( 
+       token "open" ) >>= (fn _ => ( 
+             vals ) >>= (fn  vs => ( 
+              any ) >>= (fn  str => 
+       return $ importVals str vs ) ) ) end 
+        ?
+
+fun listComp ? =
+    let
+      fun bind pat list body =
+          [ new "(List.concat (List.map (fn" ]
+          @ pat @
+          [ new "=>" ]
+          @ body @
+          [ new ")(" ]
+          @ list @
+          [ new ")))" ]
+      fun filt con body =
+          [ new "if" ]
+          @ con @
+          [ new "then" ]
+          @ body @
+          [ new "else List.nil" ]
+      val one = until $ choice $ map token ["<-", ",", "]"]
+      fun all (body, et) =
+          if tokenToString et = "]" then
+            return body
+          else let infix 0 >>= in ( 
+                            one ) >>= (fn  (fst, et) => 
+               if tokenToString et = "<-" then let infix 0 >>= in ( 
+                                  one ) >>= (fn  (list, et) => ( 
+                             all (body, et) ) >>= (fn  body' => 
+                    return $ bind fst list body' ) ) end 
+
+               else let infix 0 >>= in ( 
+                             all (body, et) ) >>= (fn  body' => 
+                    return $ filt fst body' ) end ) end 
+
+
+    in let infix 0 >>= in ( 
+         token "[" ) >>= (fn _ => ( 
+                        until $ choice $ map token ["|", "]"] ) >>= (fn  (exp, pipe) => 
+         if tokenToString pipe <> "|"
+         then fail
+         else all (new "[" :: exp @ [new "]"], pipe) ) ) end 
+
+    end ?
+
+
+fun partTuples ? = let infix 0 >>= in ( 
+             token "(" ) >>= (fn  lp => let val 
+       rps =  [new ")", new ")"] in let val 
+       fnhead =  fn v => [new "(fn", v, new "=>", lp] in let val 
+       untilNext =  until $ (try (token "," |-- (token "," ||| token ")"))
+                             ||| (token ")" |-- fail)) in 
+       ( let infix 0 >>= in ( token "," ) >>= (fn  c => ( 
+                        until $ token ")" ) >>= (fn  (rest, _) => let val 
+           v =  newNameInScope rest in 
+           return $ fnhead v @ [v, new ","] @ rest @ rps end ) ) end 
+            ||| let infix 0 >>= in ( 
+                      untilNext ) >>= (fn  (l, et) => 
+           if tokenToString et = ")"
+           then let infix 0 >>= in let val 
+                v =  newNameInScope l in 
+                return $ fnhead v @ l @ [new ",", v] @ rps end end 
+
+           else let infix 0 >>= in ( 
+                          until $ token ")" ) >>= (fn  (r, _) => let val 
+                v =  newNameInScope (l @ r) in 
+                return $ fnhead v @ l @ [new ",", v, new ","] @ r @ rps end ) end ) end 
+
+
+       ) end end end ) end 
+        ?
+
 end

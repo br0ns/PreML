@@ -8,4 +8,7 @@ sig
   val openFunctor : 'x t
   val failWithPosition : Path.t -> Source.t -> 'x t
   val includeFile : Path.t -> 'x t
+  val openFiltered : 'x t
+  val listComp : 'x t
+  val partTuples : 'x t
 end

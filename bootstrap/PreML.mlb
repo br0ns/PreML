@@ -3,6 +3,7 @@ $(SML_LIB)/basis/basis.mlb
 ../mylib/MyLib.mlb
  Base.mlb
 in
-PreML-main.sml
+main.sml
+ go.sml
 end
 
