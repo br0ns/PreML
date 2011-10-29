@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -f /usr/local/bin/preml ] && [ -f /usr/local/bin/premlton ]; then
+if [ `command -v preml` ] && [ `command -v premlton` ]; then
     OUTPUT=/tmp/preml-output
 
     rm -rf bootstrap/*
