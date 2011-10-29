@@ -3,31 +3,25 @@
 if [ `command -v preml` ] && [ `command -v premlton` ]; then
     OUTPUT=/tmp/preml-output
 
-    rm -rf bootstrap/*
-    cp src/*.sml src/*.sig src/*.fun src/*.mlb bootstrap 2> /dev/null
-
-    echo "Running PreML"
-    preml src/PreML.mlb | tee $OUTPUT
+    rm -rf bootstrap
+    cp -a src bootstrap 2> /dev/null
 
     echo ""
-    echo "(re)Moving processed files"
-    while read -r LINE; do
-        DST=`echo $LINE | sed "s/ ->.*//"` ;
-        SRC=`echo $LINE | sed "s/.*-> //"` ;
-        EXT="${DST##*.}"
-        if [[ "$EXT" != "mlb" ]]; then
-            mv src/$SRC bootstrap/$DST
-            echo mv src/$SRC bootstrap/$DST
-        else
-            rm src/$SRC
-            echo rm src/$SRC
-        fi
-    done < $OUTPUT
+    echo "Running PreML"
+    preml bootstrap/PreML.mlb
 
-    rm $OUTPUT
+    echo ""
+    echo "Renaming files"
+    for FILE in bootstrap/*; do
+        if [ `echo $FILE | grep ".preml."` ]; then
+            echo $FILE
+            mv $FILE `echo $FILE | sed s/\.preml//`
+        fi
+    done
 
     echo ""
     echo "Stripping '%pre' from MLB-files"
+    cp src/*.mlb bootstrap 2> /dev/null
     TMP=/tmp/preml-buffer
     for FILE in bootstrap/*.mlb; do
         echo $FILE
