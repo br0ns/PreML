@@ -1,0 +1,11 @@
+$(SML_LIB)/basis/basis.mlb
+%pre include.sml
+%pre list-comprehensions.sml
+%pre list-monad.sml
+%pre open-filtered.sml
+%pre option-monad.sml
+%pre partial-tuples.sml
+%pre state-monad.sml
+%pre state-monad-trans.sml
+%pre fail-with-position.sml
+%pre no-sugar.sml
