@@ -13,6 +13,23 @@ infix >>=
 val op>>= = op-->
 
 fun newName () = new $ "PreML__TMP__" ^ UniqId.next ()
+fun newNameInScope toks =
+    let
+      val cs = "xyzabcdefghijklmpqrstuvw"
+      val n = size cs
+      val first = [0]
+      val toString = implode o List.map (curry String.sub cs)
+      val rec next = fn nil => [0]
+                      | c :: cs => if c = n
+                                   then 0 :: next cs
+                                   else (c + 1) :: cs
+      fun loop v =
+          if List.exists (fn t => tokenToString t = toString v) toks
+          then loop $ next v
+          else new $ toString v
+    in
+      loop first
+    end
 
 fun doBlock ? =
     let
@@ -273,20 +290,24 @@ fun listComp ? =
 fun partTuples ? =
     do lp <- token "("
      ; rps := [new ")", new ")"]
-     ; v := newName ()
-     ; fnhead := [new "(fn", v, new "=>", lp]
+     ; fnhead := fn v => [new "(fn", v, new "=>", lp]
      ; untilNext := until $ (try (token "," |-- (token "," ||| token ")"))
                              ||| (token ")" |-- fail))
      ; (do c <- token ","
          ; (rest, _) <- until $ token ")"
-         ; return $ fnhead @ [v, new ","] @ rest @ rps
+         ; v := newNameInScope rest
+         ; return $ fnhead v @ [v, new ","] @ rest @ rps
         end |||
         do (l, et) <- untilNext
          ; if tokenToString et = ")"
-           then return $ fnhead @ l @ [new ",", v] @ rps
+           then
+             do v := newNameInScope l
+              ; return $ fnhead v @ l @ [new ",", v] @ rps
+             end
            else
              do (r, _) <- until $ token ")"
-              ; return $ fnhead @ l @ [new ",", v, new ","] @ r @ rps
+              ; v := newNameInScope (l @ r)
+              ; return $ fnhead v @ l @ [new ",", v, new ","] @ r @ rps
              end
         end
        )
