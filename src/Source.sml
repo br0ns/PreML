@@ -23,6 +23,7 @@ fun lift m s =
 fun return a s = M.return (a, s)
 fun get s = M.return (s, s)
 fun put s _ = M.return ((), s)
+fun modify f s = M.return ((), f s)
 fun evalStateT m s =
     do with M
      ; (a, _) <- m s
@@ -43,6 +44,8 @@ fun >>= (SOME x, k) = k x
 val return = SOME
 end
 
+structure Reader = StateT (Option)
+
 structure Source :> Source =
 struct
 
@@ -60,7 +63,6 @@ fun span (s, (l, r)) = string $ slice (s, l, SOME (r - l))
 
 val read = getc
 
-structure Reader = StateT (Option)
 fun position s p =
     let open Reader
       fun loop 0 r c = return {row = r, column = c}
