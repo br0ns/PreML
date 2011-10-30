@@ -2,12 +2,12 @@
 
 SML=mlton
 
-if [ `command -v preml` ] && [ `command -v premlton` ]; then
-    premlton src/PreML.mlb
-else
+if [ ! `command -v preml` ]; then
     echo "PreML is not installed.  Bootstrapping..."
-    echo ""
     $SML -output bin/preml bootstrap/PreML.mlb
-    PATH="`pwd`/bin":$PATH premlton src/PreML.mlb
+    echo "Done!"
 fi
-mv src/PreML bin/preml
+
+bin/preml src/PreML.mlb
+$SML -output bin/preml src/PreML.preml.mlb
+bin/preml src/PreML.mlb -c
