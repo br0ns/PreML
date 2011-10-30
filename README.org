@@ -12,9 +12,9 @@
 * Installation
   Right now PreML only compiles under MLTon. If you have MLTon installed you can
   build PreML simply by simply typing
-  #+begin_example
+  #+BEGIN_EXAMPLE
   make
-  #+end_example
+  #+END_EXAMPLE
   After which PreML can be found in the =bin= folder.
 
   There's also an =install= goal which installs the binaries in
@@ -27,13 +27,13 @@
    Assuming you have a working installation of Smackage (and if you don't: go to
    [[http://github.com/standardml/smackage]] to see how to get it) installation
    should be as easy as
-   #+begin_example
+   #+BEGIN_EXAMPLE
    smackage source preml git git://github.com/mortenbp/PreML.git
    smackage refresh
    smackage get preml
    smackage make preml
    smackage make preml smackage-install
-   #+end_example
+   #+END_EXAMPLE
 
    This was tested with Smackage v0.6.0.
 
@@ -44,9 +44,9 @@
 
   The MLTon wrapper =premlton= makes the use of PreML more or less transparent
   to the user:
-  #+begin_example
+  #+BEGIN_EXAMPLE
   premlton MyProject.mlb
-  #+end_example
+  #+END_EXAMPLE
   will preprocess =MyProject.mlb=, produce an executable =MyProject= from the
   result, and clean up the preprocessed files.
 
@@ -65,21 +65,21 @@
    semi colon.
 
    An example:
-   #+begin_src sml
+   #+BEGIN_SRC: sml
    do with List
     ; x <- [1, 2, 3]
     ; y <- [4, 5, 6]
     ; return (x + y)
    end
-   #+end_src
+   #+END_SRC
 
 ** =open= the result of a functor application
 
    Instead of having to bind the result of a functor application to a structure
    and then opening it one can simply write
-   #+begin_src sml
+   #+BEGIN_SRC: sml
    open F(X)
-   #+end_src
+   #+END_SRC
    where =F= is a functor name and =X= can be anything usually allowed as a
    functor argument.
 
@@ -93,7 +93,7 @@
    free.
 
    An example functor:
-   #+begin_src sml
+   #+BEGIN_SRC: sml
    functor Range (eqtype t
                   val next : t -> t) =
    struct
@@ -101,11 +101,11 @@
                       then [a]
                       else a :: range (next a, b)
    end
-   #+end_src
+   #+END_SRC
 
    and some structure implementing the interface
 
-   #+begin_src sml
+   #+BEGIN_SRC: sml
    structure MyInt =
    struct
    open Int
@@ -119,15 +119,15 @@
    eqtype t = char
    fun next c = chr (Rod c + 1)
    end
-   #+end_src
+   #+END_SRC
 
 *** Existing structures
     Now we have two structures implementing the interface of our functor. To
     extend those structure we can write
-    #+begin_src sml
+    #+BEGIN_SRC: sml
     extend MyInt as (Range)
     extend MyChar as (Range)
-    #+end_src
+    #+END_SRC
 
     Now the structures have both the =next= and the =range= function (and all
     the other functions pulled in from =Int= and =Char=).
@@ -136,46 +136,46 @@
     Another possibility is to extend the structures as we're defining them.
 
     Then the definition of =MyInt= is
-    #+begin_src sml
+    #+BEGIN_SRC: sml
     structure MyInt =
     struct (Range)
     open Int
     eqtype t = int
     fun next n = n + 1
     end
-    #+end_src
+    #+END_SRC
 
    It is possible to extend structures through more than one functor at a
    time. Simply put a list of functors in the parenthesis:
-   #+begin_src sml
+   #+BEGIN_SRC: sml
    extend Foo as (Bar, Baz)
    structure Foo =
    struct (Bar, Baz)
    ...
    end
-   #+end_src
+   #+END_SRC
 
    The =Baz= functor will then be called with union of the original structure
    and the output from =Bar=.
 
 ** Annotate =Fail= exceptions with a file position
    Instead of
-   #+begin_src sml
+   #+BEGIN_SRC: sml
    raise Fail "foo bar baz"
-   #+end_src
+   #+END_SRC
    one can write
-   #+begin_src sml
+   #+BEGIN_SRC: sml
    raise FailWithPosition "foo bar baz"
-   #+end_src
+   #+END_SRC
    The result is that the position of the _error message_ (which is not
    necessarily the same as where the exception is raised) will be prepended to
    it.
 
    The resulting error message will look like this:
-   #+begin_example
+   #+BEGIN_EXAMPLE
    ! Uncaught exception:
    ! Fail  "/tmp/sml3238ZQE(26:24): foo bar baz"
-   #+end_example
+   #+END_EXAMPLE
    which says that the exception is declared on line 26 in file
    =/tmp/sml3238ZQE=.
 
@@ -194,9 +194,9 @@
 ** Filtered =open=
    Say one needs values =foo=, =bar= and =baz= from structure =Qux=. One can
    simply write
-   #+begin_src sml
+   #+BEGIN_SRC: sml
    open (foo, bar, baz) Qux
-   #+end_src
+   #+END_SRC
 
    Note that this only works for values. PreML does not do type checking so it
    can't know if =bar= is a value, type, exception or datatype.
@@ -205,17 +205,17 @@
    PreML supports Haskell style list comprehensions.
 
    Some examples:
-   #+begin_src sml
+   #+BEGIN_SRC: sml
    val xs = MyInt.range(~5, 5)
    val foo = [x | x <- xs, x > 0]
    val bar = [x * y | x <- xs, y <- xs, y < x]
-   #+end_src
+   #+END_SRC
 
 ** Partially applied tuple constructors
    Again inspired by Haskell tuples need not be fully applied.
 
    Some examples:
-   #+begin_src sml
+   #+BEGIN_SRC: sml
    val a = (,42) 42
    val b = (42,) 42
    val c = (,) 42 42
@@ -224,14 +224,14 @@
    val f = e 41 42 43
 
    val xs = map (42,) [1,2,3]
-   #+end_src
+   #+END_SRC
 
 * Emacs configuration
   Included with PreML is the file =sml-defs.el= which modifies Emacs' sml-mode
   to work with the =do= notation. On my system the file resides in
-  #+begin_example
+  #+BEGIN_EXAMPLE
   /usr/share/emacs/site-lisp/sml-mode
-  #+end_example
+  #+END_EXAMPLE
 
   When using sml-mode in Emacs you can have your interactive interpreter
   preprocess your buffer before running it by putting the following in your
