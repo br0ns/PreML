@@ -1,17 +1,250 @@
-* PreML: A preprocessor for SML
+* PreML
+  PreML is a preprocessor for Standard ML. It's aim is to extent the language
+  with some useful syntactic sugar.
 
-Supports =do=-syntax, and more.
+  It is not the aim of PreML to turn SML into a new language. Thus I try to keep
+  the rewritings simple and easy to understand.
 
-Put this in your =.emacs=:
-#+BEGIN_SRC: lisp
-(setq sml-use-command
-      (concat
-       "local "
-       "val filei = \"%s\" "
-       "val fileo = filei ^ \".preml\" "
-       "val _ = OS.Process.system (\"preml \\\"\" ^ filei ^ \"\\\"\") "
-       "val _ = use fileo "
-       "val _ = OS.FileSys.remove fileo "
-       "in end")
-      )
-#+END_SRC
+  PreML will try to preserve your code as good as it can; Error messages from
+  your compiler will always refer to the correct line, and code parts that
+  doesn't use PreML's features will not be changed.
+
+* Installation
+  Right now PreML only compiles under MLTon. If you have MLTon installed you can
+  build PreML simply by simply typing
+  #+begin_example
+  make
+  #+end_example
+  After which PreML can be found in the =bin= folder.
+
+  There's also an =install= goal which installs the binaries in
+  =/usr/local/bin=, so you probably need to be root to do that.
+
+** Using Smackage
+   PreML also installs through Smackage. I think it's a really cool thing the
+   Smacakge guys have going so I suggest you use this method.
+
+   Assuming you have a working installation of Smackage (and if you don't: go to
+   [[http://github.com/standardml/smackage]] to see how to get it) installation
+   should be as easy as
+   #+begin_example
+   smackage source preml git git://github.com/mortenbp/PreML.git
+   smackage refresh
+   smackage get preml
+   smackage make preml
+   smackage make preml smackage-install
+   #+end_example
+
+   This was tested with Smackage v0.6.0.
+
+* Usage
+  After installation two programs are available: =preml= which is the
+  preprocessor and =premlton= which is just a shellscript wrapper for MLTon.
+  Type =preml --help= to get a help message.
+
+  The MLTon wrapper =premlton= makes the use of PreML more or less transparent
+  to the user:
+  #+begin_example
+  premlton MyProject.mlb
+  #+end_example
+  will preprocess =MyProject.mlb=, produce an executable =MyProject= from the
+  result, and clean up the preprocessed files.
+
+* Features
+  PreML understands nine kinds of syntactic sugar as of this writing (version
+  1.4.1).
+
+  Examples of most forms can be found in the =examples= folder.
+
+** =do= syntax
+   A syntax very much like Haskells =do= syntax is supported. A =do= block
+   begins with either just =do= or =do with X= where =X= is some structure
+   implementing =>>== and =return=, and ends with =end=.
+
+   Each line in a =do= block except the first and the last must begin with a
+   semi colon.
+
+   An example:
+   #+begin_src sml
+   do with List
+    ; x <- [1, 2, 3]
+    ; y <- [4, 5, 6]
+    ; return (x + y)
+   end
+   #+end_src
+
+** =open= the result of a functor application
+
+   Instead of having to bind the result of a functor application to a structure
+   and then opening it one can simply write
+   #+begin_src sml
+   open F(X)
+   #+end_src
+   where =F= is a functor name and =X= can be anything usually allowed as a
+   functor argument.
+
+   Be aware that PreML simply invents a new structure name, binds it to the
+   result and the opens it. Thus this syntax is not allowed in =let=-blocks.
+
+** Extend a structure through a functor
+   A use of functors is to derive functionality based on an
+   interface. Structures implementing that interfaces (a =compare= function for
+   instance) can then get the derived functionality through the functor for
+   free.
+
+   An example functor:
+   #+begin_src sml
+   functor Range (eqtype t
+                  val next : t -> t) =
+   struct
+   fun range (a, b) = if a = b
+                      then [a]
+                      else a :: range (next a, b)
+   end
+   #+end_src
+
+   and some structure implementing the interface
+
+   #+begin_src sml
+   structure MyInt =
+   struct
+   open Int
+   eqtype t = int
+   fun next n = n + 1
+   end
+
+   structure MyChar =
+   struct
+   open Char
+   eqtype t = char
+   fun next c = chr (Rod c + 1)
+   end
+   #+end_src
+
+*** Existing structures
+    Now we have two structures implementing the interface of our functor. To
+    extend those structure we can write
+    #+begin_src sml
+    extend MyInt as (Range)
+    extend MyChar as (Range)
+    #+end_src
+
+    Now the structures have both the =next= and the =range= function (and all
+    the other functions pulled in from =Int= and =Char=).
+
+*** New structures
+    Another possibility is to extend the structures as we're defining them.
+
+    Then the definition of =MyInt= is
+    #+begin_src sml
+    structure MyInt =
+    struct (Range)
+    open Int
+    eqtype t = int
+    fun next n = n + 1
+    end
+    #+end_src
+
+   It is possible to extend structures through more than one functor at a
+   time. Simply put a list of functors in the parenthesis:
+   #+begin_src sml
+   extend Foo as (Bar, Baz)
+   structure Foo =
+   struct (Bar, Baz)
+   ...
+   end
+   #+end_src
+
+   The =Baz= functor will then be called with union of the original structure
+   and the output from =Bar=.
+
+** Annotate =Fail= exceptions with a file position
+   Instead of
+   #+begin_src sml
+   raise Fail "foo bar baz"
+   #+end_src
+   one can write
+   #+begin_src sml
+   raise FailWithPosition "foo bar baz"
+   #+end_src
+   The result is that the position of the _error message_ (which is not
+   necessarily the same as where the exception is raised) will be prepended to
+   it.
+
+   The resulting error message will look like this:
+   #+begin_example
+   ! Uncaught exception:
+   ! Fail  "/tmp/sml3238ZQE(26:24): foo bar baz"
+   #+end_example
+   which says that the exception is declared on line 26 in file
+   =/tmp/sml3238ZQE=.
+
+** Include files
+   The keyword =include= has been overloaded, such that if what follows is
+   enclosed in quotation marks it will be treated as a (relative) file path and
+   included verbatim. More than one file can be included at a time.
+
+   If the word =singleline= (no quotation marks) follows immediately after
+   =include= the included file(s) will be placed on a single line in order to
+   preserve error message positions.
+
+   It goes without saying that debugging can be very hard in the event that the
+   included file(s) is responsible for the error.
+
+** Filtered =open=
+   Say one needs values =foo=, =bar= and =baz= from structure =Qux=. One can
+   simply write
+   #+begin_src sml
+   open (foo, bar, baz) Qux
+   #+end_src
+
+   Note that this only works for values. PreML does not do type checking so it
+   can't know if =bar= is a value, type, exception or datatype.
+
+** List comprehensions
+   PreML supports Haskell style list comprehensions.
+
+   Some examples:
+   #+begin_src sml
+   val xs = MyInt.range(~5, 5)
+   val foo = [x | x <- xs, x > 0]
+   val bar = [x * y | x <- xs, y <- xs, y < x]
+   #+end_src
+
+** Partially applied tuple constructors
+   Again inspired by Haskell tuples need not be fully applied.
+
+   Some examples:
+   #+begin_src sml
+   val a = (,42) 42
+   val b = (42,) 42
+   val c = (,) 42 42
+   val d = (42,,42) 42
+   fun e x = (,x,)
+   val f = e 41 42 43
+
+   val xs = map (42,) [1,2,3]
+   #+end_src
+
+* Emacs configuration
+  Included with PreML is the file =sml-defs.el= which modifies Emacs' sml-mode
+  to work with the =do= notation. On my system the file resides in
+  #+begin_example
+  /usr/share/emacs/site-lisp/sml-mode
+  #+end_example
+
+  When using sml-mode in Emacs you can have your interactive interpreter
+  preprocess your buffer before running it by putting the following in your
+  =.emacs=
+  #+BEGIN_SRC: lisp
+  (setq sml-use-command
+        (concat
+         "local "
+         "val filei = \"%s\" "
+         "val fileo = filei ^ \".preml\" "
+         "val _ = OS.Process.system (\"preml \\\"\" ^ filei ^ \"\\\"\") "
+         "val _ = use fileo "
+         "val _ = OS.FileSys.remove fileo "
+         "in end")
+        )
+  #+END_SRC
