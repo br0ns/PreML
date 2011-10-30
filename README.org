@@ -38,9 +38,13 @@
    This was tested with Smackage v0.6.0.
 
 * Usage
-  After installation two programs are available: =preml= which is the
   preprocessor and =premlton= which is just a shellscript wrapper for MLTon.
-  Type =preml --help= to get a help message.
+  After installation two programs are available: =preml= which is the
+  Type
+  #+BEGIN_EXAMPLE
+  preml --help
+  #+END_EXAMPLE
+  to get a help message.
 
   The MLTon wrapper =premlton= makes the use of PreML more or less transparent
   to the user:
@@ -51,8 +55,7 @@
   result, and clean up the preprocessed files.
 
 * Features
-  PreML understands nine kinds of syntactic sugar as of this writing (version
-  1.4.1).
+  PreML understands nine kinds of syntactic sugar as of this writing (v1.4.1).
 
   Examples of most forms can be found in the =examples= folder.
 
