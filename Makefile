@@ -1,10 +1,9 @@
-SML = mlton
-# .PHONY: all
-
-all: bin/preml
-
-bin/preml: src/*
+mlton: src/*
 	@bash build.sh
+
+.PHONO: smackage-install
+smackage-install:
+	mv bin/* ../../../bin
 
 install : bin/preml
 	install bin/preml /usr/local/bin

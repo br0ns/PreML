@@ -9,7 +9,5 @@ else
     echo ""
     $SML -output bin/preml bootstrap/PreML.mlb
     PATH="`pwd`/bin":$PATH premlton src/PreML.mlb
-    echo ""
-    echo "You are now ready for 'sudo make install'."
 fi
 mv src/PreML bin/preml
