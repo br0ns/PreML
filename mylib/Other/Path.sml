@@ -97,7 +97,8 @@ fun new f =
       val f = expandVars f
     in
       if P.isAbsolute f then
-        P.mkCanonical f
+        (* P.mkCanonical f *)
+        f
       else
         raise Path "Cannot create a relative path"
     end
@@ -114,7 +115,8 @@ fun new' f f' =
 
 fun append f f' = new $ toString f ^ f'
 
-fun path' f f' = P.mkCanonical (P.mkRelative {path = f', relativeTo = f})
+(* fun path' f f' = P.mkCanonical (P.mkRelative {path = f', relativeTo = f}) *)
+fun path' f f' = P.mkRelative {path = f', relativeTo = f}
 
 val file = P.file
 val dir = P.dir
