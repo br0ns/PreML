@@ -98,10 +98,12 @@ fun clean filei fileo =
     let
       val fileo = getOpt (fileo, new filei)
       fun remove file =
-          (Log.normal ("Removing '" ^ shortest file ^ "'")
-         ; OS.FileSys.remove (Path.toString file)
-           handle OS.SysErr _ => Log.chatty "  (didn't exist)"
-          )
+          if File.exists file
+          then (Log.normal ("Removing '" ^ shortest file ^ "'")
+              ; OS.FileSys.remove (Path.toString file)
+                handle OS.SysErr _ => Log.warning "  Couldn't remove"
+               )
+          else ()
     in
       if isProj filei
       then (PreMLProject.walk (fn f => clean f NONE) filei
