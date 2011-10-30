@@ -104,6 +104,7 @@ fun run filei proj fileo =
              ()
            end)
     ; Log.indent ~2
+    ; record filei fileo
     ; fileo
     end handle IO.Io {cause = OS.SysErr (desc, _), name, ...} =>
                failIO desc name
