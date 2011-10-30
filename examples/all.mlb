@@ -1,5 +1,6 @@
 $(SML_LIB)/basis/basis.mlb
 %pre include.sml
+%pre include.sml (* include.sml is only processed once *)
 %pre list-comprehensions.sml
 %pre list-monad.sml
 %pre open-filtered.sml
