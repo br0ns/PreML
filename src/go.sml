@@ -28,7 +28,7 @@ fun usage name =
        , "  -?, -h, -help, --help"
        , "     You've just read it."
         ]
-fun printVersionAndExt () = (println "preml version 1.4.6"
+fun printVersionAndExt () = (println "preml version 1.4.7"
                            ; OS.Process.exit OS.Process.success)
 fun printUsageAndExit () = (usage $ CommandLine.name ()
                           ; OS.Process.exit OS.Process.success)
