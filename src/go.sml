@@ -23,11 +23,15 @@ fun usage name =
        , "     Even more output."
        , "  -vvv"
        , "     Print debug information."
-       , "  -?, -h, -help, --help :"
+       , "  --version"
+       , "     Print version number and exit."
+       , "  -?, -h, -help, --help"
        , "     You've just read it."
         ]
+fun printVersionAndExt () = (println "preml version 1.4.6"
+                           ; OS.Process.exit OS.Process.success)
 fun printUsageAndExit () = (usage $ CommandLine.name ()
-                          ; OS.Process.exit OS.Process.failure)
+                          ; OS.Process.exit OS.Process.success)
 fun die e = (Log.warning e ; OS.Process.exit OS.Process.failure)
 
 local
@@ -103,18 +107,19 @@ fun parseArgs args =
       val one =
           do tok <- any
            ; case tok of
-               "-o"     => any >>> setDst
-             | "-t"     => fileType
-             | "-c"     => return $ setDoClean true
-             | "-q"     => return $ setLogLevel Log.Quiet
-             | "-v"     => return $ setLogLevel Log.Chatty
-             | "-vv"    => return $ setLogLevel Log.Verbose
-             | "-vvv"   => return $ setLogLevel Log.Debug
-             | "-?"     => printUsageAndExit ()
-             | "-h"     => printUsageAndExit ()
-             | "-help"  => printUsageAndExit ()
-             | "--help" => printUsageAndExit ()
-             |  _       => return $ setSrc tok
+               "-o"        => any >>> setDst
+             | "-t"        => fileType
+             | "-c"        => return $ setDoClean true
+             | "-q"        => return $ setLogLevel Log.Quiet
+             | "-v"        => return $ setLogLevel Log.Chatty
+             | "-vv"       => return $ setLogLevel Log.Verbose
+             | "-vvv"      => return $ setLogLevel Log.Debug
+             | "-?"        => printUsageAndExit ()
+             | "-h"        => printUsageAndExit ()
+             | "-help"     => printUsageAndExit ()
+             | "--help"    => printUsageAndExit ()
+             | "--version" => printVersionAndExt ()
+             |  _          => return $ setSrc tok
           end
       val parse =
           do many' one
