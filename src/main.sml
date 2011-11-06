@@ -77,7 +77,7 @@ fun run filei proj fileo =
                           )
            val _ =
                if proj
-               then changes "file changed" "files changed"
+               then changes "file path changed" "file paths changed"
                else changes "change" "changes"
            val _ = if n = 0
                    then Log.warning ("No changes to '" ^ shortest filei ^
