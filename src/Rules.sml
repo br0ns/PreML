@@ -206,15 +206,6 @@ fun includeFile path =
       fun readFile s =
           TextIO.readFile $ Path.toString $ Path.new' path $ stripQuotes s
       val strings = many1 $ (predicate isString o liftP tokenToString)
-      (* fun strings ? = *)
-      (*     (try do t <- any *)
-      (*           ; s := tokenToString t *)
-      (*           ; if isString s *)
-      (*             then strings >>> (fn ss => s :: ss) *)
-      (*             else fail *)
-      (*          end ||| *)
-      (*      return nil *)
-      (*     ) ? *)
     in
       do token "include"
        ; singleline <- (token "singleline" produce true ||| return false)
