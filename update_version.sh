@@ -7,6 +7,6 @@ function prep {
 
 prep preml.smackspec.skel
 prep src/version.sml.skel
-git add preml.smackspec src/version.sml
+git add VERSION preml.smackspec src/version.sml
 git commit -m "$1"
 git tag v$VERSION -a -m "$1"
