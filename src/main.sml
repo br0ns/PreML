@@ -28,7 +28,7 @@ fun isProj file = extOneOf file ["mlb", "cm"]
 fun failIO desc name =
     raise Fail (desc ^ ": '" ^ shortest (Path.new name) ^ "'")
 
-fun run filei proj fileo =
+fun run force filei proj fileo =
     let open Time OS.FileSys
       val fileo = case fileo of
                     SOME fileo => fileo
@@ -55,11 +55,11 @@ fun run filei proj fileo =
                    ; proj
                    end
       val doRun =
-          proj orelse
+          proj orelse force orelse
           modTime (Path.toString filei) > modTime (Path.toString fileo)
           handle _ => true
       val prep = if proj
-                 then PreMLProject.run runDefault
+                 then PreMLProject.run $ runDefault force
                  else PreML.run
     in
       Log.normal $ shortest filei
@@ -92,7 +92,8 @@ fun run filei proj fileo =
                failIO desc name
 
 (* and runDefault filei = run filei NONE NONE *)
-and runDefault filei = run filei (SOME $ isProj filei) (SOME $ new filei)
+and runDefault force filei =
+    run force filei (SOME $ isProj filei) (SOME $ new filei)
 
 fun clean filei fileo =
     let

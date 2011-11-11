@@ -12,6 +12,10 @@ fun usage name =
          \ preprocessing <file>."
        , "     The type of <file> and the path of <file'> is chosen\
          \ automatically."
+       , "  -f"
+       , "     Force preprocessing, even thoug a file hasn't changed. Useful\
+         \ when if a"
+       , "     includes other files that might change."
        , "  -c"
        , "     Clean up preprocessed files. If the -o option was used during"
        , "     preprocessing, it must be used again with the same target."
@@ -35,62 +39,22 @@ fun printUsageAndExit () = (usage $ CommandLine.name ()
 fun die e = (Log.warning e ; OS.Process.exit OS.Process.failure)
 
 local
-  val opt = ref
-              {logLevel  = Log.Normal
-             , isProject = NONE
-             , src       = NONE
-             , dst       = NONE
-             , doClean   = false
-              }
+  val logLevel = ref Log.Normal
+  val isProject = ref NONE
+  val src = ref NONE
+  val dst = ref NONE
+  val doClean = ref false
+  val doForce = ref false
 
-  fun setLogLevel l =
-      case !opt of
-        {logLevel, isProject, src, dst, doClean} =>
-        opt := {logLevel = l
-              , isProject = isProject
-              , src = src
-              , dst = dst
-              , doClean = doClean}
-
-  fun setIsProject p =
-      case !opt of
-        {logLevel, isProject, src, dst, doClean} =>
-        opt := {logLevel = logLevel
-              , isProject = SOME p
-              , src = src
-              , dst = dst
-              , doClean = doClean}
-
-  fun setDst d =
-      case !opt of
-        {logLevel, isProject, src, dst, doClean} =>
-        opt := {logLevel = logLevel
-              , isProject = isProject
-              , src = src
-              , dst = SOME d
-              , doClean = doClean}
-
-  fun setSrc s =
-      case !opt of
-        {logLevel, isProject, src, dst, doClean} =>
-        case src of
-          SOME s => raise Fail ("Only one source file allowed \
-                                \(you already told me '" ^ s ^ "')")
-        | _ =>
-          opt := {logLevel = logLevel
-                , isProject = isProject
-                , src = SOME s
-                , dst = dst
-                , doClean = doClean}
-
-  fun setDoClean c =
-      case !opt of
-        {logLevel, isProject, src, dst, doClean} =>
-        opt := {logLevel = logLevel
-              , isProject = isProject
-              , src = src
-              , dst = dst
-              , doClean = c}
+  fun setLogLevel x = logLevel := x
+  fun setIsProject x = isProject := SOME x
+  fun setSrc x = case !src of
+                   SOME s => raise Fail ("Only one source file allowed \
+                                         \(you already told me '" ^ s ^ "')")
+                 | NONE => src := SOME x
+  fun setDst x = dst := SOME x
+  fun setDoClean x = doClean := x
+  fun setDoForce x = doForce := x
 in
 fun parseArgs args =
     let open Parser val op >>= = op --> infix >>> ||| --|
@@ -110,6 +74,7 @@ fun parseArgs args =
                "-o"        => any >>> setDst
              | "-t"        => fileType
              | "-c"        => return $ setDoClean true
+             | "-f"        => return $ setDoForce true
              | "-q"        => return $ setLogLevel Log.Quiet
              | "-v"        => return $ setLogLevel Log.Chatty
              | "-vv"       => return $ setLogLevel Log.Verbose
@@ -130,7 +95,7 @@ fun parseArgs args =
       then printUsageAndExit ()
       else
         case Parse.list parse args of
-          Right _ => !opt
+          Right _ => (!logLevel, !isProject, !src, !dst, !doClean, !doForce)
         | Left ({token = SOME x, ...} :: _) =>
           raise Fail ("Could not parse command line arguments\
                       \ (failed on '" ^ x ^ "')")
@@ -141,7 +106,7 @@ end
 
 fun go () =
     let
-      val {logLevel, isProject, src, dst, doClean} =
+      val (logLevel, isProject, src, dst, doClean, doForce) =
           parseArgs $ CommandLine.arguments ()
       val src =
           case src of
@@ -160,7 +125,7 @@ fun go () =
         )
       else
         let
-          val dst' = Main.run src isProject dst
+          val dst' = Main.run doForce src isProject dst
           fun log f = f ("Output written to '" ^ Main.shortest dst' ^ "'")
         in
           case dst of
