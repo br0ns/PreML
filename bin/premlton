@@ -3,16 +3,12 @@ hash preml 2>&- || { echo >&2 "PreML is not installed.  Aborting."; exit 1; }
 hash mlton 2>&- || { echo >&2 "MLTon is not installed.  Aborting."; exit 1; }
 
 if [ ${#@} -gt 0 ]; then
-    ARGS=${@:1:${#@}-1}
-    FILE=${@:${#@}}
-    cd "`dirname $FILE`"
-    SRC="`basename $FILE`"
-    DST=".premlton.$SRC"
-    preml "$SRC" -o "$DST"
-    echo ""
-    echo "Preprocessing done.  Running mlton."
-    mlton $ARGS -output "`basename "$SRC" .mlb`" "$DST"
-    preml "$SRC" -o "$DST" -c -q
+    SRC=${@:${#@}}
+    DST="$SRC.premlton.mlb"
+    preml $SRC -o $DST
+    echo $SRC $DST
+    mlton "$@".premlton.mlb
+    preml $SRC -o $DST -c
 else
     echo "Usage: $0 <file>"
 fi
