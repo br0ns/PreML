@@ -6,9 +6,10 @@ if [ ${#@} -gt 0 ]; then
     SRC=${@:${#@}}
     DST="$SRC.premlton.mlb"
     preml $SRC -o $DST
-    echo $SRC $DST
     mlton "$@".premlton.mlb
     preml $SRC -o $DST -c
+    cd "`dirname $SRC`"
+    mv "`basename $DST .mlb`" "`basename $SRC .mlb`"
 else
     echo "Usage: $0 <file>"
 fi
