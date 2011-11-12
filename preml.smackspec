@@ -1,4 +1,4 @@
-provides: preml 1.4.11
+provides: preml 1.5.0
 description: PreML, a preprocessor for Standard ML
 maintainer: Morten Brøns-Pedersen <f at ntast dot dk>
 keywords: preprocessor
