@@ -13,7 +13,7 @@
   Right now PreML only compiles under MLTon. If you have MLTon installed you can
   build PreML simply by simply typing
   #+BEGIN_EXAMPLE
-  make
+  git submodule update && make
   #+END_EXAMPLE
   After which PreML can be found in the =bin= folder.
 
