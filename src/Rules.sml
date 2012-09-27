@@ -191,8 +191,8 @@ fun extendNew ? =
 fun stripQuotes s = String.substring (s, 1, size s - 2);
 fun isString s = size s > 0 andalso String.sub(s, 0) = #"\""
 
-fun failWithPosition file source =
-    do token "FailWithPosition"
+fun failHere file source =
+    do token "FailHere"
      ; s <- any
      ; (p, _) := tokenSpan s
      ; {row = r, column = c} := Source.position source p
@@ -251,13 +251,21 @@ fun listComp ? =
           [ new ")(" ]
           @ list @
           [ new ")))" ]
+      fun letb pat expr body =
+          [ new "let val" ]
+          @ pat @
+          [ new "=" ]
+          @ expr @
+          [ new "in" ]
+          @ body @
+          [ new "end"]
       fun filt con body =
           [ new "if" ]
           @ con @
           [ new "then" ]
           @ body @
           [ new "else List.nil" ]
-      val one = until $ choice $ map token ["<-", ",", "]"]
+      val one = until $ choice $ map token ["<-", ",", ":=", "]"]
       fun all (body, et) =
           if tokenToString et = "]" then
             return body
@@ -267,6 +275,11 @@ fun listComp ? =
                  do (list, et) <- one
                   ; body' <- all (body, et)
                   ; return $ bind fst list body'
+                 end
+               else if tokenToString et = ":=" then
+                 do (expr, et) <- one
+                  ; body' <- all (body, et)
+                  ; return $ letb fst expr body'
                  end
                else
                  do body' <- all (body, et)
@@ -307,6 +320,35 @@ fun partTuples ? =
              end
         end
        )
+    end ?
+
+fun lazy ? =
+    let
+      val expr =
+          do _ <- token "("
+           ; (body, _) <- until $ token ")"
+           ; return body
+          end |||
+          do t <- any
+           ; return [t]
+          end
+      fun rewrite a b =
+          do token a
+           ; body <- expr
+           ; return $ map new [b, "(", "fn", "_", "=>", "("] @ body @
+             [new ")", new ")"]
+          end
+      fun replace a b =
+          do token a
+           ; return [new b]
+          end
+    in
+      choice
+        [ rewrite "L" "lazy"
+        , rewrite "D" "delay"
+        , replace "F" "force"
+        , replace "E" "eager"
+        ]
     end ?
 
 end

@@ -1,4 +1,4 @@
-val x = raise FailWithPosition "foo"
+val x = raise FailHere "foo"
 
 (* On my system (using MosML 2.10) I see this:
  * - sml19387iLv -> 1 -> sml19387iLv.preml

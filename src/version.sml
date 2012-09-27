@@ -1,1 +1,1 @@
-val version = "1.5.4"
+val version = "1.6.0"

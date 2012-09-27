@@ -76,7 +76,7 @@ fun position s p =
     in
       case evalStateT (loop p 1 0) s of
         SOME r => r
-      | NONE   => raise FailWithPosition
+      | NONE   => raise FailHere
                           "PreML.Source.position: Reached end of file."
     end
 end

@@ -8,5 +8,6 @@ $(SML_LIB)/basis/basis.mlb
 %pre partial-tuples.sml
 %pre state-monad.sml
 %pre state-monad-trans.sml
-%pre fail-with-position.sml
+%pre fail-here.sml
 %pre no-sugar.sml
+%pre lazy.sml
