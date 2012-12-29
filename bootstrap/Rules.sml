@@ -191,8 +191,8 @@ fun extendNew ? = let infix 0 >>= in (
 fun stripQuotes s = String.substring (s, 1, size s - 2);
 fun isString s = size s > 0 andalso String.sub(s, 0) = #"\""
 
-fun failWithPosition file source = let infix 0 >>= in ( 
-       token "FailWithPosition" ) >>= (fn _ => ( 
+fun failHere file source = let infix 0 >>= in ( 
+       token "FailHere" ) >>= (fn _ => ( 
             any ) >>= (fn  s => let val 
        (p, _) =  tokenSpan s in let val 
        {row = r, column = c} =  Source.position source p in let val 
@@ -205,15 +205,7 @@ fun includeFile path =
     let
       fun readFile s =
           TextIO.readFile $ Path.toString $ Path.new' path $ stripQuotes s
-      fun strings ? =
-          (try let infix 0 >>= in ( any ) >>= (fn  t => let val 
-                  s =  tokenToString t in 
-                  if isString s
-                  then strings >>> (fn ss => s :: ss)
-                  else fail end ) end 
-                   |||
-           return nil
-          ) ?
+      val strings = many1 $ (predicate isString o liftP tokenToString)
     in let infix 0 >>= in ( 
          token "include" ) >>= (fn _ => ( 
                        (token "singleline" produce true ||| return false) ) >>= (fn  singleline => ( 
@@ -259,13 +251,21 @@ fun listComp ? =
           [ new ")(" ]
           @ list @
           [ new ")))" ]
+      fun letb pat expr body =
+          [ new "let val" ]
+          @ pat @
+          [ new "=" ]
+          @ expr @
+          [ new "in" ]
+          @ body @
+          [ new "end"]
       fun filt con body =
           [ new "if" ]
           @ con @
           [ new "then" ]
           @ body @
           [ new "else List.nil" ]
-      val one = until $ choice $ map token ["<-", ",", "]"]
+      val one = until $ choice $ map token ["<-", ",", ":=", "]"]
       fun all (body, et) =
           if tokenToString et = "]" then
             return body
@@ -275,6 +275,11 @@ fun listComp ? =
                                   one ) >>= (fn  (list, et) => ( 
                              all (body, et) ) >>= (fn  body' => 
                     return $ bind fst list body' ) ) end 
+
+               else if tokenToString et = ":=" then let infix 0 >>= in ( 
+                                  one ) >>= (fn  (expr, et) => ( 
+                             all (body, et) ) >>= (fn  body' => 
+                    return $ letb fst expr body' ) ) end 
 
                else let infix 0 >>= in ( 
                              all (body, et) ) >>= (fn  body' => 
@@ -316,5 +321,34 @@ fun partTuples ? = let infix 0 >>= in (
 
        ) end end end ) end 
         ?
+
+fun lazy ? =
+    let
+      val expr = let infix 0 >>= in ( 
+                  token "(" ) >>= (fn  _ => ( 
+                          until $ token ")" ) >>= (fn  (body, _) => 
+             return body ) ) end 
+              ||| let infix 0 >>= in ( 
+                  any ) >>= (fn  t => 
+             return [t] ) end 
+
+      fun rewrite a b = let infix 0 >>= in ( 
+             token a ) >>= (fn _ => ( 
+                     expr ) >>= (fn  body => 
+             return $ map new [b, "(", "fn", "_", "=>", "("] @ body @
+             [new ")", new ")"] ) ) end 
+
+      fun replace a b = let infix 0 >>= in ( 
+             token a ) >>= (fn _ => 
+             return [new b] ) end 
+
+    in
+      choice
+        [ rewrite "L" "lazy"
+        , rewrite "D" "delay"
+        , replace "F" "force"
+        , replace "E" "eager"
+        ]
+    end ?
 
 end

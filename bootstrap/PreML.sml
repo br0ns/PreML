@@ -10,11 +10,12 @@ fun run pathI pathO =
                    , openFunctor
                    , extendExisting
                    , extendNew
-                   , failWithPosition pathI src
+                   , failHere pathI src
                    , includeFile $ Path.dir pathI
                    , openFiltered
                    , listComp
                    , partTuples
+                   , lazy
                    ]
           end
       val (n, src') = Rewrite.run Token.sml src rules

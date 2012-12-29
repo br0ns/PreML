@@ -26,7 +26,7 @@ fun tokenToString t =
 fun tokenSpan t =
     case t of
       Old (_, (_, s)) => s
-    | New _ => raise Fail "/home/mortenbp/code/sml/preml/bootstrap/Rewrite.sml(29:38): `New` token has no span" 
+    | New _ => raise Fail "/home/br0ns/code/sml/preml/bootstrap/Rewrite.sml(29:30): `New` token has no span" 
 
 fun compareTokens a b = String.compare (tokenToString a, tokenToString b)
 fun sameToken a b = compareTokens a b = EQUAL

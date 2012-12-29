@@ -76,7 +76,7 @@ fun position s p =
     in
       case evalStateT (loop p 1 0) s of
         SOME r => r
-      | NONE   => raise Fail "/home/mortenbp/code/sml/preml/bootstrap/Source.sml(80:26): PreML.Source.position: Reached end of file." 
+      | NONE   => raise Fail "/home/br0ns/code/sml/preml/bootstrap/Source.sml(80:26): PreML.Source.position: Reached end of file." 
 
     end
 end

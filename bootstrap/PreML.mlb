@@ -4,6 +4,7 @@ $(SML_LIB)/basis/basis.mlb
  Base.mlb
 in
 main.sml
+version.sml
  go.sml
 end
 
